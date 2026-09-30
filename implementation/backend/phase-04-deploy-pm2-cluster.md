@@ -39,11 +39,12 @@ node server/init-admin.js
 ### 2.4. Khởi chạy PM2 ở chế độ Cluster (Tối đa hóa CPU)
 ```bash
 # Khởi động Backend đa luồng tận dụng toàn bộ số nhân CPU của VPS
-pm2 start server/app.js --name "khaosat-backend" -i max
+pm2 start ecosystem.config.js
+# Hoặc: pm2 start server/app.js --name "khaosat-tungthien" -i max
 
 # Kiểm tra trạng thái hoạt động
 pm2 status
-pm2 logs khaosat-backend --lines 20
+pm2 logs khaosat-tungthien --lines 20
 
 # Cấu hình PM2 tự động khởi chạy cùng hệ điều hành khi máy chủ reboot
 pm2 startup
@@ -57,5 +58,5 @@ pm2 save
 - [ ] `npm install --production` hoàn thành không có lỗi.
 - [ ] Thư mục `data/` có quyền ghi và Database SQLite được khởi tạo thành công.
 - [ ] Tài khoản Admin được khởi tạo an toàn.
-- [ ] Tiến trình PM2 `khaosat-backend` đang ở trạng thái `online` (status: active).
-- [ ] Máy chủ nội bộ `http://127.0.0.1:3000/api/admin/stats` phản hồi dữ liệu JSON chính xác.
+- [ ] Tiến trình PM2 `khaosat-tungthien` đang ở trạng thái `online` (status: active).
+- [ ] Máy chủ nội bộ `http://127.0.0.1:3026/api/admin/stats` phản hồi dữ liệu JSON chính xác.

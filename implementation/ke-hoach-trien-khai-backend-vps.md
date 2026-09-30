@@ -136,7 +136,8 @@ qlda_khaosat/
 3. Khởi tạo tài khoản Admin mặc định ban đầu cho cán bộ.
 4. Khởi động Backend bằng PM2 ở chế độ Cluster:
    ```bash
-   pm2 start server/app.js --name "khaosat-backend" -i max
+   pm2 start ecosystem.config.js
+   # Hoặc: pm2 start server/app.js --name "khaosat-tungthien" -i max
    pm2 startup
    pm2 save
    ```
