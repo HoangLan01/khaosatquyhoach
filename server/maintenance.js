@@ -4,6 +4,7 @@ const path = require('path');
 const rootDir = path.join(__dirname, '..');
 const flagFile = path.join(rootDir, 'maintenance.flag');
 const indexPath = path.join(rootDir, 'index.html');
+const surveyPath = path.join(rootDir, 'survey.html');
 const indexRealBackupPath = path.join(rootDir, 'index.real.html');
 const maintenancePath = path.join(rootDir, 'maintenance.html');
 
@@ -11,17 +12,12 @@ const action = (process.argv[2] || '').toLowerCase();
 
 if (action === 'on' || action === 'dong' || action === 'close') {
   try {
-    // 1. Sao lưu file index.html gốc nếu chưa có bản sao lưu
-    if (fs.existsSync(indexPath) && !fs.existsSync(indexRealBackupPath)) {
-      fs.copyFileSync(indexPath, indexRealBackupPath);
-    }
-
-    // 2. Ghi đè file maintenance.html vào index.html để Nginx phục vụ ngay lập tức
+    // 1. Ghi đè file maintenance.html vào index.html để Nginx phục vụ ngay lập tức
     if (fs.existsSync(maintenancePath)) {
       fs.copyFileSync(maintenancePath, indexPath);
     }
 
-    // 3. Đánh dấu cờ bảo trì
+    // 2. Đánh dấu cờ bảo trì
     fs.writeFileSync(flagFile, JSON.stringify({
       enabled: true,
       updatedAt: new Date().toISOString()
@@ -35,9 +31,15 @@ if (action === 'on' || action === 'dong' || action === 'close') {
   }
 } else if (action === 'off' || action === 'mo' || action === 'open') {
   try {
-    // 1. Khôi phục lại file index.html gốc từ bản sao lưu
-    if (fs.existsSync(indexRealBackupPath)) {
+    // 1. Khôi phục lại file index.html từ survey.html master
+    if (fs.existsSync(surveyPath)) {
+      fs.copyFileSync(surveyPath, indexPath);
+    } else if (fs.existsSync(indexRealBackupPath)) {
       fs.copyFileSync(indexRealBackupPath, indexPath);
+    }
+
+    // Xóa file backup tạm thời cũ nếu có
+    if (fs.existsSync(indexRealBackupPath)) {
       fs.unlinkSync(indexRealBackupPath);
     }
 
@@ -52,10 +54,11 @@ if (action === 'on' || action === 'dong' || action === 'close') {
     console.error('Lỗi khi mở lại trang:', err);
   }
 } else {
-  const isEnabled = fs.existsSync(flagFile) || fs.existsSync(indexRealBackupPath);
+  const isEnabled = fs.existsSync(flagFile);
   console.log('ℹ TRẠNG THÁI CỔNG HIỆN TẠI:', isEnabled ? '🛑 ĐANG TẠM ĐÓNG (Hiển thị trang thông báo)' : '🟢 ĐANG MỞ HOẠT ĐỘNG');
   console.log('\nCách sử dụng:');
   console.log('  npm run dong-trang   -> Tạm đóng trang (hiện thông báo ngay)');
   console.log('  npm run mo-trang     -> Mở lại trang web bình thường');
 }
+
 
