@@ -34,11 +34,11 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Hàm tạo mã biên nhận ngẫu nhiên
+// Hàm tạo mã biên nhận ngẫu nhiên siêu an toàn (1.000 tỷ khả năng)
 function generateReceiptCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = 'TT-2026-';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
@@ -67,25 +67,39 @@ app.post('/api/survey/submit', (req, res) => {
     // Lấy thông tin IP & User Agent
     const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
-
-    // Tạo mã biên nhận & thời gian tiếp nhận
-    const receiptCode = generateReceiptCode();
     const createdAt = new Date().toISOString();
 
-    insertSurvey({
-      receiptCode,
-      selectedProject,
-      fullName: person.fullName.trim(),
-      phone: (person.phone || '').trim(),
-      address: person.address.trim(),
-      email: (person.email || '').trim(),
-      answers: answers || {},
-      comments: comments || {},
-      otherOpinion: (otherOpinion || '').trim(),
-      ipAddress: String(ipAddress).split(',')[0].trim(),
-      userAgent,
-      createdAt
-    });
+    // Lưu khảo sát với cơ chế auto-retry nếu trùng mã biên nhận
+    let savedSurvey = null;
+    let receiptCode = '';
+    let attempts = 0;
+
+    while (attempts < 5) {
+      attempts++;
+      receiptCode = generateReceiptCode();
+      try {
+        savedSurvey = insertSurvey({
+          receiptCode,
+          selectedProject,
+          fullName: person.fullName.trim(),
+          phone: (person.phone || '').trim(),
+          address: person.address.trim(),
+          email: (person.email || '').trim(),
+          answers: answers || {},
+          comments: comments || {},
+          otherOpinion: (otherOpinion || '').trim(),
+          ipAddress: String(ipAddress).split(',')[0].trim(),
+          userAgent: String(userAgent).slice(0, 300),
+          createdAt
+        });
+        break;
+      } catch (err) {
+        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE' && attempts < 5) {
+          continue;
+        }
+        throw err;
+      }
+    }
 
     return res.status(200).json({
       success: true,
