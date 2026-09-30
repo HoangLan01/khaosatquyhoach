@@ -3561,58 +3561,80 @@
       goToStep(4);
     });
 
-    // SUBMISSION FLOW WITH LOADING & ANTI-DOUBLE SUBMIT (PHASE 06)
+    // SUBMISSION FLOW CONNECTED TO BACKEND API (PHASE 01 BACKEND)
     const finishSurveyBtn = document.getElementById('finishSurvey');
     const finishBtnSpinner = document.getElementById('finishBtnSpinner');
     const finishBtnText = document.getElementById('finishBtnText');
     const btnBackFromReview = document.getElementById('btnBackFromReview');
 
     if (finishSurveyBtn) {
-      finishSurveyBtn.addEventListener('click', () => {
+      finishSurveyBtn.addEventListener('click', async () => {
         // Anti double-submit & loading state
         finishSurveyBtn.disabled = true;
         if (btnBackFromReview) btnBackFromReview.disabled = true;
         if (finishBtnSpinner) finishBtnSpinner.style.display = 'inline-block';
         if (finishBtnText) finishBtnText.textContent = 'Đang gửi ý kiến...';
 
-        // Simulate secure API submission
-        setTimeout(() => {
-          const receiptCode = generateReceiptCode();
-          const now = new Date();
-          const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' - ' + 
-                          now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formData = collectFormData();
+        const payload = {
+          selectedProject: formData.selectedProject,
+          person: formData.person,
+          answers: formData.answers,
+          comments: formData.comments,
+          otherOpinion: formData.otherOpinion
+        };
 
-          const name = document.getElementById('fullName')?.value.trim() || '—';
-          const address = document.getElementById('address')?.value.trim() || '—';
+        try {
+          const res = await fetch('/api/survey/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
 
-          // Populate receipt
-          const rCodeEl = document.getElementById('receiptCode');
-          const rTimeEl = document.getElementById('receiptTime');
-          const rNameEl = document.getElementById('receiptName');
-          const rAddrEl = document.getElementById('receiptAddress');
-          const rProjEl = document.getElementById('receiptProject');
+          if (result.success) {
+            const receiptCode = result.receiptCode || generateReceiptCode();
+            const timeStr = result.timestamp 
+              ? (new Date(result.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' - ' + new Date(result.timestamp).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }))
+              : (new Date().toLocaleTimeString('vi-VN') + ' - ' + new Date().toLocaleDateString('vi-VN'));
 
-          if (rCodeEl) rCodeEl.textContent = receiptCode;
-          if (rTimeEl) rTimeEl.textContent = timeStr;
-          if (rNameEl) rNameEl.textContent = name;
-          if (rAddrEl) rAddrEl.textContent = address;
-          if (rProjEl) rProjEl.textContent = projectNames[selectedProject] || '—';
+            const name = formData.person.fullName || '—';
+            const address = formData.person.address || '—';
 
-          // Clear completed draft from LocalStorage so banner won't annoy user next time
-          try {
-            localStorage.removeItem(DRAFT_STORAGE_KEY);
-          } catch (e) {}
+            // Populate receipt
+            const rCodeEl = document.getElementById('receiptCode');
+            const rTimeEl = document.getElementById('receiptTime');
+            const rNameEl = document.getElementById('receiptName');
+            const rAddrEl = document.getElementById('receiptAddress');
+            const rProjEl = document.getElementById('receiptProject');
 
+            if (rCodeEl) rCodeEl.textContent = receiptCode;
+            if (rTimeEl) rTimeEl.textContent = timeStr;
+            if (rNameEl) rNameEl.textContent = name;
+            if (rAddrEl) rAddrEl.textContent = address;
+            if (rProjEl) rProjEl.textContent = projectNames[selectedProject] || '—';
+
+            // Clear completed draft from LocalStorage so banner won't annoy user next time
+            try {
+              localStorage.removeItem(DRAFT_STORAGE_KEY);
+            } catch (e) {}
+
+            // Go to Step 5
+            goToStep(5);
+            showToast('✓ Đã gửi ý kiến đóng góp thành công!');
+          } else {
+            showToast(result.message || 'Không thể gửi ý kiến. Vui lòng thử lại.');
+          }
+        } catch (err) {
+          console.error('API Error:', err);
+          showToast('Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng.');
+        } finally {
           // Reset button state
           finishSurveyBtn.disabled = false;
           if (btnBackFromReview) btnBackFromReview.disabled = false;
           if (finishBtnSpinner) finishBtnSpinner.style.display = 'none';
           if (finishBtnText) finishBtnText.textContent = 'Hoàn tất & Gửi ý kiến 🚀';
-
-          // Go to Step 5
-          goToStep(5);
-          showToast('✓ Đã gửi ý kiến đóng góp thành công!');
-        }, 850);
+        }
       });
     }
 
