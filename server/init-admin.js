@@ -1,7 +1,7 @@
 const { findAdminByUsername, createAdmin, getAdminCount } = require('./database');
 const { hashPassword } = require('./auth');
 
-const defaultUsername = process.env.ADMIN_USER || 'admin_tungthien';
+const defaultUsername = process.env.ADMIN_USER || 'admin';
 const defaultPassword = process.env.ADMIN_PASS || 'TungThien@2026';
 const defaultFullName = 'Cán bộ Quản trị Phường Tùng Thiện';
 
