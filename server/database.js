@@ -46,10 +46,10 @@ db.exec(`
 `);
 
 const projectNames = {
-  merged: 'Đồ án Quy hoạch phân khu đô thị ST3 và vùng hồ Xuân Khanh và phụ cận',
-  both: 'Đồ án Quy hoạch phân khu đô thị ST3 và vùng hồ Xuân Khanh và phụ cận',
-  st3: 'Quy hoạch phân khu đô thị ST3',
-  xuankhanh: 'Quy hoạch vùng hồ Xuân Khanh và phụ cận'
+  merged: 'Quy hoạch phân khu đô thị ST3, tỷ lệ 1/2000; Quy hoạch phân khu khu chức năng vùng hồ Xuân Khanh và phụ cận, tỷ lệ 1/2000.',
+  both: 'Quy hoạch phân khu đô thị ST3, tỷ lệ 1/2000; Quy hoạch phân khu khu chức năng vùng hồ Xuân Khanh và phụ cận, tỷ lệ 1/2000.',
+  st3: 'Quy hoạch phân khu đô thị ST3, tỷ lệ 1/2000',
+  xuankhanh: 'Quy hoạch phân khu khu chức năng vùng hồ Xuân Khanh và phụ cận, tỷ lệ 1/2000'
 };
 
 // Insert khảo sát
