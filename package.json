@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/app.js",
     "dev": "node --watch server/app.js",
-    "init-admin": "node server/init-admin.js"
+    "init-admin": "node server/init-admin.js",
+    "reset-db": "node server/reset-db.js"
   },
   "keywords": [
     "khaosat",
