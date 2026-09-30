@@ -3212,6 +3212,33 @@
     const draftRestoreBanner = document.getElementById('draftRestoreBanner');
     const draftRestoreTimeText = document.getElementById('draftRestoreTimeText');
 
+    let currentStep = 1;
+    let selectedProject = null;
+    let activeBothTab = 'st3';
+    let saveTimeout = null;
+
+    const stepTitles = {
+      1: 'Chọn đồ án muốn góp ý',
+      2: 'Thông tin người đóng góp ý kiến',
+      3: 'Đánh giá nội dung đồ án',
+      4: 'Xác nhận & Ý kiến khác',
+      5: 'Hoàn tất đóng góp ý kiến'
+    };
+
+    const projectNames = {
+      st3: 'Quy hoạch phân khu đô thị ST3',
+      xuankhanh: 'Quy hoạch phân khu khu chức năng vùng hồ Xuân Khanh và phụ cận',
+      both: 'Cả hai đồ án: ST3 và vùng hồ Xuân Khanh và phụ cận'
+    };
+
+    const commonQuestions = [
+      'Các căn cứ lập quy hoạch đã đầy đủ hay chưa?',
+      'Quy mô lập quy hoạch có phù hợp với quy định không?',
+      'Tính chất và chức năng khu vực có phù hợp không?',
+      'Phương án quy hoạch có phù hợp không?',
+      'Quý vị có đồng ý với toàn bộ các nội dung của đồ án quy hoạch để triển khai các bước tiếp theo không?'
+    ];
+
     function showToast(message) {
       if (!toast) return;
       toast.textContent = message;
