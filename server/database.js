@@ -13,6 +13,10 @@ const db = new Database(dbPath);
 // Tối ưu hóa hiệu năng cao cho SQLite (WAL mode xử lý đọc ghi đồng thời cực tốt)
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
+db.pragma('busy_timeout = 5000');
+db.pragma('cache_size = -64000');
+db.pragma('temp_store = MEMORY');
+db.pragma('mmap_size = 268435456');
 
 // Khởi tạo bảng dữ liệu
 db.exec(`
@@ -80,8 +84,16 @@ function insertSurvey(data) {
   });
 }
 
-// Thống kê số liệu tóm tắt
+let cachedStats = null;
+let cachedStatsTime = 0;
+
+// Thống kê số liệu tóm tắt (có bộ đệm 2s siêu tốc)
 function getStats() {
+  const now = Date.now();
+  if (cachedStats && (now - cachedStatsTime < 2000)) {
+    return cachedStats;
+  }
+
   const totalRow = db.prepare('SELECT COUNT(*) as count FROM surveys').get();
   const mergedRow = db.prepare("SELECT COUNT(*) as count FROM surveys WHERE selected_project = 'merged' OR selected_project = 'both'").get();
 
@@ -134,7 +146,7 @@ function getStats() {
     questionStats[k].rate = qTotal > 0 ? Math.round((questionStats[k].agree / qTotal) * 100) : 0;
   });
 
-  return {
+  const resData = {
     totalSurveys: totalRow.count,
     mergedCount: mergedRow.count,
     questionStats,
@@ -146,6 +158,10 @@ function getStats() {
       disagreeRate
     }
   };
+
+  cachedStats = resData;
+  cachedStatsTime = now;
+  return resData;
 }
 
 // Lấy danh sách khảo sát có tìm kiếm & lọc

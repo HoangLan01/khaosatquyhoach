@@ -186,7 +186,17 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
-// Lấy thống kê tổng quan
+// Lấy thống kê công khai (dành cho bộ đếm hoặc kiểm tra)
+app.get('/api/stats', (req, res) => {
+  try {
+    const stats = getStats();
+    return res.json({ success: true, stats });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê.' });
+  }
+});
+
+// Lấy thống kê tổng quan (Admin)
 app.get('/api/admin/stats', requireAdminAuth, (req, res) => {
   try {
     const stats = getStats();
