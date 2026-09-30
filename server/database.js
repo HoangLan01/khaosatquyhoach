@@ -46,9 +46,10 @@ db.exec(`
 `);
 
 const projectNames = {
+  merged: 'Đồ án Quy hoạch phân khu đô thị ST3 và vùng hồ Xuân Khanh và phụ cận',
+  both: 'Đồ án Quy hoạch phân khu đô thị ST3 và vùng hồ Xuân Khanh và phụ cận',
   st3: 'Quy hoạch phân khu đô thị ST3',
-  xuankhanh: 'Quy hoạch vùng hồ Xuân Khanh và phụ cận',
-  both: 'Cả hai đồ án (ST3 & Xuân Khanh)'
+  xuankhanh: 'Quy hoạch vùng hồ Xuân Khanh và phụ cận'
 };
 
 // Insert khảo sát
@@ -65,7 +66,7 @@ function insertSurvey(data) {
 
   return stmt.run({
     receipt_code: data.receiptCode,
-    selected_project: data.selectedProject,
+    selected_project: data.selectedProject || 'merged',
     full_name: data.fullName,
     phone: data.phone || null,
     address: data.address,
@@ -82,23 +83,43 @@ function insertSurvey(data) {
 // Thống kê số liệu tóm tắt
 function getStats() {
   const totalRow = db.prepare('SELECT COUNT(*) as count FROM surveys').get();
-  const st3Row = db.prepare("SELECT COUNT(*) as count FROM surveys WHERE selected_project = 'st3'").get();
-  const xkRow = db.prepare("SELECT COUNT(*) as count FROM surveys WHERE selected_project = 'xuankhanh'").get();
-  const bothRow = db.prepare("SELECT COUNT(*) as count FROM surveys WHERE selected_project = 'both'").get();
+  const mergedRow = db.prepare("SELECT COUNT(*) as count FROM surveys WHERE selected_project = 'merged' OR selected_project = 'both'").get();
 
-  // Đếm tỷ lệ đồng thuận trên toàn bộ câu trả lời
+  // Đếm tỷ lệ đồng thuận trên toàn bộ câu trả lời và theo từng câu hỏi
   const allSurveys = db.prepare('SELECT answers_json FROM surveys').all();
   let totalVotes = 0;
   let agreeVotes = 0;
   let disagreeVotes = 0;
 
+  const questionStats = {
+    q1: { agree: 0, disagree: 0, title: 'Tính chất và chức năng khu vực' },
+    q2: { agree: 0, disagree: 0, title: 'Phương án quy hoạch' },
+    q3: { agree: 0, disagree: 0, title: 'Đồng ý triển khai các bước tiếp theo' }
+  };
+
   allSurveys.forEach(row => {
     try {
       const answers = JSON.parse(row.answers_json || '{}');
-      Object.values(answers).forEach(val => {
-        totalVotes++;
-        if (val === 'Đồng thuận') agreeVotes++;
-        else if (val === 'Chưa đồng thuận') disagreeVotes++;
+      Object.entries(answers).forEach(([key, val]) => {
+        let mappedKey = null;
+        if (key === 'q1' || key === 'st3_q3' || key === 'xk_q3' || key === 'merged_q1') {
+          mappedKey = 'q1';
+        } else if (key === 'q2' || key === 'st3_q4' || key === 'xk_q4' || key === 'merged_q2') {
+          mappedKey = 'q2';
+        } else if (key === 'q3' || key === 'st3_q5' || key === 'xk_q5' || key === 'merged_q3') {
+          mappedKey = 'q3';
+        }
+
+        if (mappedKey) {
+          totalVotes++;
+          if (val === 'Đồng thuận') {
+            agreeVotes++;
+            questionStats[mappedKey].agree++;
+          } else if (val === 'Chưa đồng thuận') {
+            disagreeVotes++;
+            questionStats[mappedKey].disagree++;
+          }
+        }
       });
     } catch (e) {}
   });
@@ -106,13 +127,17 @@ function getStats() {
   const agreeRate = totalVotes > 0 ? Math.round((agreeVotes / totalVotes) * 100) : 0;
   const disagreeRate = totalVotes > 0 ? (100 - agreeRate) : 0;
 
+  // Tính tỷ lệ theo từng câu hỏi
+  ['q1', 'q2', 'q3'].forEach(k => {
+    const qTotal = questionStats[k].agree + questionStats[k].disagree;
+    questionStats[k].total = qTotal;
+    questionStats[k].rate = qTotal > 0 ? Math.round((questionStats[k].agree / qTotal) * 100) : 0;
+  });
+
   return {
     totalSurveys: totalRow.count,
-    projectCounts: {
-      st3: st3Row.count,
-      xuankhanh: xkRow.count,
-      both: bothRow.count
-    },
+    mergedCount: mergedRow.count,
+    questionStats,
     votingStats: {
       totalVotes,
       agreeVotes,

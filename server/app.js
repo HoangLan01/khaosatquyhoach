@@ -49,12 +49,7 @@ function generateReceiptCode() {
 // -------------------------------------------------------------
 app.post('/api/survey/submit', (req, res) => {
   try {
-    const { selectedProject, person, answers, comments, otherOpinion } = req.body;
-
-    // Validate dữ liệu bắt buộc
-    if (!selectedProject || !['st3', 'xuankhanh', 'both'].includes(selectedProject)) {
-      return res.status(400).json({ success: false, message: 'Vui lòng chọn đồ án quy hoạch muốn đóng góp ý kiến.' });
-    }
+    const { selectedProject = 'merged', person, answers, comments, otherOpinion } = req.body;
 
     if (!person || !person.fullName || !person.fullName.trim()) {
       return res.status(400).json({ success: false, message: 'Họ và tên người đóng góp là bắt buộc.' });
@@ -183,20 +178,21 @@ app.get('/api/admin/export', requireAdminAuth, (req, res) => {
   try {
     const surveys = getAllSurveysForExport();
 
-    const questionsList = [
-      '1. Căn cứ lập quy hoạch',
-      '2. Quy mô lập quy hoạch',
-      '3. Tính chất & Chức năng',
-      '4. Phương án quy hoạch',
-      '5. Đồng ý triển khai các bước tiếp theo'
-    ];
-
-    // Chuyển đổi dữ liệu sang định dạng bảng Excel
+    // Chuyển đổi dữ liệu sang định dạng bảng Excel chuẩn 3 câu hỏi
     const excelRows = surveys.map((s, index) => {
       const answers = s.answers || {};
       const comments = s.comments || {};
 
-      const row = {
+      const valQ1 = answers.q1 || answers.st3_q3 || answers.xk_q3 || answers.merged_q1 || '—';
+      const cmtQ1 = comments.c1 || comments.st3_comment3 || comments.xk_comment3 || comments.merged_c1 || '';
+
+      const valQ2 = answers.q2 || answers.st3_q4 || answers.xk_q4 || answers.merged_q2 || '—';
+      const cmtQ2 = comments.c2 || comments.st3_comment4 || comments.xk_comment4 || comments.merged_c2 || '';
+
+      const valQ3 = answers.q3 || answers.st3_q5 || answers.xk_q5 || answers.merged_q3 || '—';
+      const cmtQ3 = comments.c3 || comments.st3_comment5 || comments.xk_comment5 || comments.merged_c3 || '';
+
+      return {
         'STT': index + 1,
         'Mã biên nhận': s.receipt_code,
         'Thời gian gửi': new Date(s.created_at).toLocaleString('vi-VN'),
@@ -204,31 +200,16 @@ app.get('/api/admin/export', requireAdminAuth, (req, res) => {
         'Địa chỉ cư trú / Trụ sở': s.address,
         'Số điện thoại': s.phone || '—',
         'Email': s.email || '—',
-        'Đồ án tham gia': s.projectName
+        'Đồ án': s.projectName || 'Đồ án Quy hoạch phân khu ST3 & vùng hồ Xuân Khanh',
+        'Câu 1: Tính chất & Chức năng': valQ1,
+        'Ý kiến Câu 1': cmtQ1,
+        'Câu 2: Phương án quy hoạch': valQ2,
+        'Ý kiến Câu 2': cmtQ2,
+        'Câu 3: Đồng ý triển khai bước tiếp theo': valQ3,
+        'Ý kiến Câu 3': cmtQ3,
+        'Ý kiến, kiến nghị khác': s.other_opinion || '',
+        'Địa chỉ IP': s.ip_address || ''
       };
-
-      if (s.selected_project === 'both') {
-        // Cả 2 đồ án
-        for (let i = 1; i <= 5; i++) {
-          row[`[ST3] Câu ${i}`] = answers[`st3_q${i}`] || '—';
-          row[`[ST3] Ý kiến câu ${i}`] = comments[`st3_comment${i}`] || '';
-        }
-        for (let i = 1; i <= 5; i++) {
-          row[`[Xuân Khanh] Câu ${i}`] = answers[`xk_q${i}`] || '—';
-          row[`[Xuân Khanh] Ý kiến câu ${i}`] = comments[`xk_comment${i}`] || '';
-        }
-      } else {
-        const prefix = s.selected_project === 'st3' ? 'st3' : 'xk';
-        for (let i = 1; i <= 5; i++) {
-          row[`Câu ${i} (${questionsList[i - 1]})`] = answers[`${prefix}_q${i}`] || '—';
-          row[`Ý kiến chi tiết Câu ${i}`] = comments[`${prefix}_comment${i}`] || '';
-        }
-      }
-
-      row['Ý kiến, kiến nghị khác'] = s.other_opinion || '';
-      row['Địa chỉ IP'] = s.ip_address || '';
-
-      return row;
     });
 
     const wb = XLSX.utils.book_new();
@@ -243,7 +224,14 @@ app.get('/api/admin/export', requireAdminAuth, (req, res) => {
       { wch: 32 }, // Địa chỉ
       { wch: 15 }, // SĐT
       { wch: 22 }, // Email
-      { wch: 35 }  // Đồ án
+      { wch: 38 }, // Đồ án
+      { wch: 30 }, // Câu 1
+      { wch: 30 }, // Ý kiến C1
+      { wch: 28 }, // Câu 2
+      { wch: 30 }, // Ý kiến C2
+      { wch: 35 }, // Câu 3
+      { wch: 30 }, // Ý kiến C3
+      { wch: 35 }, // Kiến nghị khác
     ];
     ws['!cols'] = colWidths;
 
