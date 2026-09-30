@@ -2529,22 +2529,12 @@
             </div>
           </div>
 
-          <!-- REVIEW CHECK BOX (GATE) -->
-          <div class="review-box" id="reviewBox">
-            <label class="review-check" for="reviewConfirm">
-              <input type="checkbox" id="reviewConfirm" />
-              <span>
-                <strong>Tôi đã xem hồ sơ quy hoạch trước khi đóng góp ý kiến</strong>
-                <span>Việc xác nhận giúp đảm bảo người tham gia đã tiếp cận nội dung, bản đồ và phương án của đồ án trước khi điền khảo sát.</span>
-              </span>
-            </label>
-            <div class="review-status" id="reviewStatus">Chưa xác nhận</div>
+          <!-- NÚT GÓP Ý TRỰC TIẾP DƯỚI KHUNG XEM TÀI LIỆU -->
+          <div style="margin-top: 24px; text-align: center;">
+            <button type="button" class="btn btn-primary js-open-survey" style="padding: 14px 32px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 14px rgba(184, 41, 49, 0.25);">
+              ✍ Bắt đầu đóng góp ý kiến ngay
+            </button>
           </div>
-        </div>
-
-        <div class="survey-gate-note">
-          <span>ℹ</span>
-          <span>Sau khi xem tài liệu, quý vị tích vào ô xác nhận phía trên rồi bấm nút <strong>“Bắt đầu góp ý”</strong> để mở biểu mẫu khảo sát.</span>
         </div>
       </div>
     </section>
@@ -3208,28 +3198,6 @@
       setTimeout(() => toast.classList.remove('show'), 3200);
     }
 
-    function setReviewed(value) {
-      if (!reviewConfirm) return;
-      reviewConfirm.checked = value;
-      if (reviewStatus) {
-        reviewStatus.textContent = value ? '✓ Đã xác nhận' : 'Chưa xác nhận';
-        reviewStatus.classList.toggle('ok', value);
-      }
-      try {
-        localStorage.setItem('tungthienPlanningReviewed', value ? '1' : '0');
-        localStorage.setItem('tungthien_planning_reviewed', value ? '1' : '0');
-      } catch (e) {}
-    }
-
-    if (reviewConfirm) {
-      try {
-        if (localStorage.getItem('tungthienPlanningReviewed') === '1' || localStorage.getItem('tungthien_planning_reviewed') === '1') {
-          setReviewed(true);
-        }
-      } catch (e) {}
-      reviewConfirm.addEventListener('change', () => setReviewed(reviewConfirm.checked));
-    }
-
     function updateProgressBar(step) {
       const percentage = Math.min(100, Math.max(25, (step / 4) * 100));
       if (progressBarFill) progressBarFill.style.width = `${percentage}%`;
@@ -3509,18 +3477,6 @@
 
     function openModal(e) {
       if (e) e.preventDefault();
-
-      // GATE CHECK
-      if (reviewConfirm && !reviewConfirm.checked) {
-        document.getElementById('tai-lieu')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        showToast('Vui lòng xem hồ sơ quy hoạch và tích xác nhận trước khi bắt đầu góp ý.');
-        if (reviewBox) {
-          reviewBox.classList.remove('highlight-pulse');
-          void reviewBox.offsetWidth;
-          reviewBox.classList.add('highlight-pulse');
-        }
-        return;
-      }
 
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
