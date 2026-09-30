@@ -234,77 +234,6 @@
       transform: translateY(-1px);
     }
 
-    /* MOBILE TOGGLE */
-    .mobile-toggle {
-      display: none;
-      width: 44px;
-      height: 44px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: #ffffff;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 5px;
-      padding: 0;
-      flex-shrink: 0;
-    }
-    .mobile-toggle span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: var(--ink);
-      border-radius: 2px;
-      transition: all 0.25s ease;
-    }
-    .mobile-toggle.active span:nth-child(1) {
-      transform: translateY(7px) rotate(45deg);
-    }
-    .mobile-toggle.active span:nth-child(2) {
-      opacity: 0;
-    }
-    .mobile-toggle.active span:nth-child(3) {
-      transform: translateY(-7px) rotate(-45deg);
-    }
-
-    .mobile-drawer {
-      display: none;
-      position: fixed;
-      top: 73px;
-      left: 0;
-      width: 100%;
-      background: #ffffff;
-      border-bottom: 1px solid var(--line);
-      box-shadow: var(--shadow-lg);
-      padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
-      z-index: 55;
-    }
-    .mobile-drawer.open {
-      display: block;
-    }
-    .mobile-menu-links {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-    .mobile-menu-links a {
-      padding: 12px 14px;
-      font-size: 15px;
-      font-weight: 650;
-      color: var(--ink-light);
-      border-radius: 10px;
-      transition: background 0.15s ease;
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-    }
-    .mobile-menu-links a:hover, .mobile-menu-links a:active {
-      background: var(--red-soft);
-      color: var(--red);
-    }
-
     /* BUTTONS */
     .btn {
       border: 0;
@@ -2130,9 +2059,6 @@
       .nav-links a:not(.nav-cta) {
         display: none;
       }
-      .mobile-toggle {
-        display: flex;
-      }
       .hero-grid, .guide-grid {
         grid-template-columns: 1fr;
       }
@@ -2357,23 +2283,6 @@
         <a href="#huong-dan">Hướng dẫn</a>
         <a href="#khao-sat" class="nav-cta js-open-survey">Bắt đầu góp ý</a>
       </nav>
-
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Mở danh mục điều hướng" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-
-    <!-- MOBILE DRAWER -->
-    <div class="mobile-drawer" id="mobileDrawer">
-      <div class="mobile-menu-links">
-        <a href="#do-an" class="js-mobile-nav">02 Đồ án quy hoạch</a>
-        <a href="#y-nghia" class="js-mobile-nav">Mục tiêu & Ý nghĩa</a>
-        <a href="#tai-lieu" class="js-mobile-nav">Hồ sơ quy hoạch</a>
-        <a href="#huong-dan" class="js-mobile-nav">Hướng dẫn quy trình</a>
-      </div>
-      <button class="btn btn-primary js-open-survey" style="width: 100%;">Bắt đầu góp ý ngay</button>
     </div>
   </header>
 
@@ -3300,8 +3209,6 @@
     const stepBadge = document.getElementById('stepBadge');
     const stepTitleDisplay = document.getElementById('stepTitleDisplay');
 
-    const mobileToggle = document.getElementById('mobileToggle');
-    const mobileDrawer = document.getElementById('mobileDrawer');
     const draftRestoreBanner = document.getElementById('draftRestoreBanner');
     const draftRestoreTimeText = document.getElementById('draftRestoreTimeText');
 
