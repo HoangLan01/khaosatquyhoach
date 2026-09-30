@@ -3471,12 +3471,6 @@
     function openModal(e) {
       if (e) e.preventDefault();
 
-      if (mobileDrawer && mobileDrawer.classList.contains('open')) {
-        mobileDrawer.classList.remove('open');
-        mobileToggle?.classList.remove('active');
-        mobileToggle?.setAttribute('aria-expanded', 'false');
-      }
-
       // GATE CHECK
       if (reviewConfirm && !reviewConfirm.checked) {
         document.getElementById('tai-lieu')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
