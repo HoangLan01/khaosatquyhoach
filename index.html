@@ -8,6 +8,9 @@
   <meta name="description" content="Cổng thông tin lấy ý kiến cơ quan, tổ chức, cá nhân và cộng đồng dân cư đối với các đồ án quy hoạch phân khu ST3 và vùng hồ Xuân Khanh trên địa bàn phường Tùng Thiện." />
   <link rel="icon" type="image/png" href="assets/logo.png" />
 
+  <!-- Thư viện Mozilla PDF.js hỗ trợ xem PDF mượt mà trên mọi thiết bị -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     :root {
       --red: #9d1c20;
@@ -782,91 +785,267 @@
       color: var(--red);
     }
 
-    /* PDF EMBED CONTAINER */
-    .pdf-wrap {
-      background: #eef1f6;
-      padding: 12px;
+    /* ============================================================
+       INTERACTIVE PLANNING PDF VIEWER COMPONENT
+       ============================================================ */
+    .pdf-viewer-card {
+      background: #1e293b;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       position: relative;
     }
-    .pdf-frame {
-      width: 100%;
-      height: min(72vh, 780px);
-      min-height: 520px;
-      border: 0;
-      border-radius: 12px;
-      background: #ffffff;
-      display: block;
-    }
 
-    /* MOBILE PDF CARD */
-    .mobile-doc-card {
-      display: none;
-      padding: 22px 18px;
-      background: linear-gradient(145deg, #ffffff, #fafbfc);
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      margin: 14px;
-    }
-    .mobile-doc-card-inner {
+    /* TOOLBAR CHUYÊN DỤNG */
+    .pdf-toolbar {
+      background: #0f172a;
+      color: #f1f5f9;
+      padding: 10px 18px;
       display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .mobile-doc-badge {
-      display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11.5px;
-      font-weight: 750;
-      padding: 4px 10px;
-      background: #f0f2f6;
-      color: var(--ink-light);
-      border-radius: 6px;
-      width: fit-content;
-    }
-    .mobile-doc-title {
-      font-size: 16.5px;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--ink);
-    }
-    .mobile-doc-desc {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-    .mobile-doc-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .mobile-toggle-frame-btn {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--red);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      text-decoration: underline;
-      padding: 6px 0;
-      text-align: left;
-      min-height: 38px;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 5;
     }
 
-    .doc-size-warning {
-      margin: 14px 26px 0;
-      padding: 12px 16px;
-      background: var(--gold-soft);
-      border: 1px solid #fae7be;
-      border-radius: 10px;
-      font-size: 13px;
-      color: #634f18;
+    .pdf-toolbar-left, .pdf-toolbar-right {
       display: flex;
       align-items: center;
       gap: 8px;
-      line-height: 1.45;
+      flex-wrap: wrap;
+    }
+
+    .pdf-tool-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      min-height: 36px;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    .pdf-tool-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.24);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+    }
+
+    .pdf-tool-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .pdf-tool-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .pdf-page-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .pdf-page-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+    }
+
+    .pdf-page-input {
+      width: 48px;
+      height: 28px;
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 750;
+      font-size: 13px;
+      padding: 0 4px;
+    }
+
+    .pdf-zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .pdf-zoom-level {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 46px;
+      text-align: center;
+      color: #94a3b8;
+    }
+
+    .pdf-btn-mode {
+      background: #2563eb;
+      border-color: #3b82f6;
+    }
+    .pdf-btn-mode:hover {
+      background: #1d4ed8 !important;
+    }
+
+    .pdf-btn-download {
+      background: var(--red);
+      border-color: var(--red-light);
+    }
+    .pdf-btn-download:hover {
+      background: var(--red-dark) !important;
+    }
+
+    /* KHUNG HIỂN THỊ CANVAS & STAGE */
+    .pdf-stage {
+      background: #334155;
+      position: relative;
+      min-height: 520px;
+      height: min(74vh, 800px);
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px;
+      -webkit-overflow-scrolling: touch;
+      outline: none;
+    }
+
+    .pdf-canvas-container {
+      position: relative;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+      border-radius: 4px;
+      background: #ffffff;
+      display: inline-block;
+      margin: auto;
+      transition: width 0.15s ease, height 0.15s ease;
+    }
+
+    .pdf-canvas-container canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* NATIVE IFRAME DỰ PHÒNG */
+    .pdf-native-frame {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+      border: none;
+      background: #ffffff;
+    }
+
+    .pdf-viewer-card.show-native .pdf-canvas-container {
+      display: none;
+    }
+    .pdf-viewer-card.show-native .pdf-native-frame {
+      display: block;
+    }
+
+    /* LỚP PHỦ LOADING & SPINNER */
+    .pdf-loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: #ffffff;
+      z-index: 10;
+      transition: opacity 0.25s ease;
+    }
+
+    .pdf-loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      display: none;
+    }
+
+    .pdf-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: pdfSpin 0.75s linear infinite;
+    }
+
+    @keyframes pdfSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .pdf-loading-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    .pdf-loading-sub {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    /* FOOTER BAR DƯỚI KHUNG XEM */
+    .pdf-footer-bar {
+      background: #0f172a;
+      padding: 10px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .pdf-tip-text strong {
+      color: #f1f5f9;
+    }
+
+    /* CHẾ ĐỘ XEM TOÀN MÀN HÌNH */
+    .pdf-viewer-card.is-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      z-index: 99999 !important;
+      border-radius: 0 !important;
+    }
+
+    .pdf-viewer-card.is-fullscreen .pdf-stage {
+      height: calc(100vh - 100px) !important;
+      min-height: auto !important;
     }
 
     /* REVIEW CONFIRM BOX */
@@ -1989,17 +2168,30 @@
     }
 
     @media (max-width: 768px) {
-      .pdf-wrap {
-        display: none;
+      .pdf-toolbar {
+        padding: 8px 12px;
+        gap: 8px;
       }
-      .pdf-wrap.show-on-mobile {
-        display: block;
+      .pdf-toolbar-left, .pdf-toolbar-right {
+        width: 100%;
+        justify-content: space-between;
       }
-      .mobile-doc-card {
-        display: block;
+      .pdf-stage {
+        height: min(60vh, 520px);
+        min-height: 380px;
+        padding: 8px;
       }
-      .doc-size-warning {
-        margin: 12px 16px 0;
+      .pdf-tool-btn {
+        padding: 5px 9px;
+        font-size: 12px;
+        min-height: 34px;
+      }
+      .pdf-page-controls {
+        padding: 2px 6px;
+      }
+      .pdf-footer-bar {
+        padding: 8px 12px;
+        font-size: 12px;
       }
 
       /* MOBILE MODAL AS NATIVE APP VIEW (100dvh + STICKY FOOTER) */
@@ -2347,39 +2539,76 @@
             </div>
           </div>
 
-          <!-- CẢNH BÁO DUNG LƯỢNG CHO THIẾT BỊ DI ĐỘNG -->
-          <div class="doc-size-warning">
-            <span>💡</span>
-            <span><strong>Lưu ý:</strong> Tài liệu gồm 111 trang với nhiều bản đồ màu chi tiết. Khi dùng điện thoại di động, quý vị nên chọn nút <strong>“Mở toàn màn hình”</strong> hoặc dùng kết nối Wi-Fi để xem rõ nét nhất.</span>
-          </div>
-
-          <!-- MOBILE CARD PREVIEW -->
-          <div class="mobile-doc-card">
-            <div class="mobile-doc-card-inner">
-              <div class="mobile-doc-badge">📄 Báo cáo quy hoạch chính thức</div>
-              <div class="mobile-doc-title">Báo cáo Đồ án Quy hoạch ST3 & Xuân Khanh (111 trang)</div>
-              <p class="mobile-doc-desc">
-                Đã sẵn sàng để đọc trực tiếp. Trên điện thoại, bạn có thể mở trong cửa sổ riêng để dễ dàng dùng tay phóng to các bản đồ quy hoạch chi tiết.
-              </p>
-              <div class="mobile-doc-actions">
-                <a class="doc-btn doc-btn-primary" href="documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf" target="_blank" rel="noopener">↗ Mở toàn màn hình (Dễ phóng to)</a>
-                <a class="doc-btn" href="documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf" download="Bao_cao_Quy_hoach_ST3_Xuan_Khanh.pdf">↓ Tải tệp PDF về điện thoại</a>
+          <!-- TRÌNH XEM TÀI LIỆU PDF TRỰC TIẾP TÍCH HỢP -->
+          <div class="pdf-viewer-card" id="pdfViewerCard">
+            <!-- THANH ĐIỀU KHIỂN CHUYÊN DỤNG (TOOLBAR) -->
+            <div class="pdf-toolbar" id="pdfToolbar">
+              <div class="pdf-toolbar-left">
+                <!-- Điều hướng trang -->
+                <div class="pdf-page-controls">
+                  <button type="button" class="pdf-tool-btn" id="pdfBtnPrev" title="Trang trước (Phím Mũi tên Trái)">◀ Trước</button>
+                  <span class="pdf-page-indicator">
+                    Trang <input type="number" id="pdfPageInput" min="1" max="111" value="1" title="Nhập số trang rồi ấn Enter" /> / <span id="pdfTotalPages">111</span>
+                  </span>
+                  <button type="button" class="pdf-tool-btn" id="pdfBtnNext" title="Trang sau (Phím Mũi tên Phải)">Sau ▶</button>
+                </div>
+                
+                <!-- Thu phóng -->
+                <div class="pdf-zoom-controls">
+                  <button type="button" class="pdf-tool-btn" id="pdfBtnZoomOut" title="Thu nhỏ">🔍−</button>
+                  <button type="button" class="pdf-tool-btn" id="pdfBtnZoomFit" title="Vừa chiều rộng khung xem">↔ Vừa khung</button>
+                  <button type="button" class="pdf-tool-btn" id="pdfBtnZoomIn" title="Phóng to">🔍+</button>
+                  <span class="pdf-zoom-level" id="pdfZoomLevel">100%</span>
+                </div>
               </div>
-              <button type="button" class="mobile-toggle-frame-btn" id="mobileToggleFrameBtn">
-                ▶ Hiển thị khung xem PDF trực tiếp trên trang
-              </button>
-            </div>
-          </div>
 
-          <!-- KHUNG XEM PDF TRỰC TIẾP -->
-          <div class="pdf-wrap" id="pdfWrap">
-            <iframe 
-              id="pdfIframe"
-              class="pdf-frame" 
-              src="documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf#page=1&view=FitH" 
-              title="Hồ sơ quy hoạch phân khu ST3 và Xuân Khanh"
-              loading="lazy">
-            </iframe>
+              <div class="pdf-toolbar-right">
+                <!-- Đổi chế độ hiển thị -->
+                <button type="button" class="pdf-tool-btn pdf-btn-mode" id="pdfBtnToggleMode" title="Chuyển đổi giữa chế độ Canvas Web và Trình xem gốc">
+                  🔄 Đổi bộ xem
+                </button>
+                
+                <!-- Phóng to toàn màn hình -->
+                <button type="button" class="pdf-tool-btn" id="pdfBtnFullscreen" title="Mở chế độ xem toàn màn hình">
+                  ⛶ Toàn màn hình
+                </button>
+                
+                <!-- Tải file PDF -->
+                <a class="pdf-tool-btn pdf-btn-download" href="documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf" download="Bao_cao_Quy_hoach_ST3_Xuan_Khanh.pdf" title="Tải tệp PDF đầy đủ về máy">
+                  ↓ Tải PDF
+                </a>
+              </div>
+            </div>
+
+            <!-- KHU VỰC HIỂN THỊ TRANG (CANVAS & NATIVE EMBED) -->
+            <div class="pdf-stage" id="pdfStage" tabindex="0" title="Dùng phím Mũi tên hoặc vuốt cảm ứng để chuyển trang">
+              <!-- VÙNG CANVAS RENDER PDF.JS -->
+              <div class="pdf-canvas-container" id="pdfCanvasContainer">
+                <canvas id="pdfCanvas"></canvas>
+              </div>
+
+              <!-- VÙNG DỰ PHÒNG NATIVE IFRAME -->
+              <iframe 
+                id="pdfIframeFallback" 
+                class="pdf-native-frame" 
+                src="" 
+                title="Khung xem tài liệu PDF">
+              </iframe>
+
+              <!-- LỚP PHỦ LOADING / TRẠNG THÁI -->
+              <div class="pdf-loading-overlay" id="pdfLoadingOverlay">
+                <div class="pdf-spinner"></div>
+                <div class="pdf-loading-text" id="pdfLoadingText">Đang kết nối tài liệu quy hoạch ST3 & Xuân Khanh...</div>
+                <div class="pdf-loading-sub">Báo cáo tổng hợp 111 trang (~39.4 MB)</div>
+              </div>
+            </div>
+
+            <!-- THANH THÔNG TIN DƯỚI ĐÁY KHUNG XEM -->
+            <div class="pdf-footer-bar">
+              <div class="pdf-tip-text">
+                💡 <em>Mẹo xem nhanh:</em> Nhấp vào các nút <strong>"Trang 01", "Trang 14", "Trang 35"...</strong> ở trên để nhảy nhanh tới từng phần quy hoạch. Bấm <strong>⛶ Toàn màn hình</strong> để soi rõ nét sơ đồ bản đồ.
+              </div>
+            </div>
           </div>
 
           <!-- REVIEW CHECK BOX (GATE) -->
@@ -2737,6 +2966,329 @@
     const PDF_BASE_URL = 'documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf';
     const DRAFT_STORAGE_KEY = 'tungthien_survey_draft_v1';
 
+    // -------------------------------------------------------------
+    // INTERACTIVE PLANNING PDF VIEWER ENGINE (PDF.JS & FALLBACK)
+    // -------------------------------------------------------------
+    const pdfViewerCard = document.getElementById('pdfViewerCard');
+    const pdfStage = document.getElementById('pdfStage');
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const pdfCanvasContainer = document.getElementById('pdfCanvasContainer');
+    const pdfIframeFallback = document.getElementById('pdfIframeFallback');
+    const pdfLoadingOverlay = document.getElementById('pdfLoadingOverlay');
+    const pdfLoadingText = document.getElementById('pdfLoadingText');
+    const pdfBtnPrev = document.getElementById('pdfBtnPrev');
+    const pdfBtnNext = document.getElementById('pdfBtnNext');
+    const pdfPageInput = document.getElementById('pdfPageInput');
+    const pdfTotalPages = document.getElementById('pdfTotalPages');
+    const pdfBtnZoomIn = document.getElementById('pdfBtnZoomIn');
+    const pdfBtnZoomOut = document.getElementById('pdfBtnZoomOut');
+    const pdfBtnZoomFit = document.getElementById('pdfBtnZoomFit');
+    const pdfZoomLevel = document.getElementById('pdfZoomLevel');
+    const pdfBtnToggleMode = document.getElementById('pdfBtnToggleMode');
+    const pdfBtnFullscreen = document.getElementById('pdfBtnFullscreen');
+
+    let pdfDoc = null;
+    let pdfCurrentPage = 1;
+    let pdfTotalPageCount = 111;
+    let pdfScale = 1.0;
+    let isRendering = false;
+    let pageRenderingQueue = null;
+    let isNativeMode = false;
+    let autoFitScale = 1.0;
+
+    // Cấu hình Worker PDF.js
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    async function initPdfViewer() {
+      if (!pdfCanvas) return;
+      showPdfLoading(true, 'Đang kết nối tài liệu quy hoạch ST3 & Xuân Khanh...');
+
+      if (!window.pdfjsLib) {
+        console.warn('PDF.js chưa sẵn sàng, chuyển sang chế độ Trình xem gốc.');
+        switchToNativeMode();
+        return;
+      }
+
+      try {
+        const loadingTask = pdfjsLib.getDocument({
+          url: PDF_BASE_URL,
+          rangeChunkSize: 65536,
+          disableAutoFetch: false,
+          disableStream: false
+        });
+
+        loadingTask.onProgress = function(progress) {
+          if (progress.total > 0) {
+            const percent = Math.min(100, Math.round((progress.loaded / progress.total) * 100));
+            if (pdfLoadingText) {
+              pdfLoadingText.textContent = `Đang tải tài liệu quy hoạch (${percent}%)...`;
+            }
+          }
+        };
+
+        pdfDoc = await loadingTask.promise;
+        pdfTotalPageCount = pdfDoc.numPages || 111;
+        if (pdfTotalPages) pdfTotalPages.textContent = pdfTotalPageCount;
+        if (pdfPageInput) pdfPageInput.max = pdfTotalPageCount;
+
+        await calculateFitScale();
+        await renderPdfPage(pdfCurrentPage);
+        showPdfLoading(false);
+      } catch (err) {
+        console.error('Lỗi khi nạp PDF qua PDF.js:', err);
+        switchToNativeMode();
+      }
+    }
+
+    async function calculateFitScale() {
+      if (!pdfDoc) return;
+      try {
+        const page = await pdfDoc.getPage(pdfCurrentPage);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const stageWidth = (pdfStage?.clientWidth || window.innerWidth) - 36;
+        autoFitScale = Math.min(2.0, Math.max(0.5, stageWidth / unscaledViewport.width));
+        pdfScale = autoFitScale;
+        updateZoomBadge();
+      } catch (e) {
+        pdfScale = 1.0;
+      }
+    }
+
+    async function renderPdfPage(num) {
+      if (!pdfDoc || !pdfCanvas) return;
+      if (isRendering) {
+        pageRenderingQueue = num;
+        return;
+      }
+
+      isRendering = true;
+      num = Math.max(1, Math.min(num, pdfTotalPageCount));
+      pdfCurrentPage = num;
+      if (pdfPageInput) pdfPageInput.value = num;
+
+      // Cập nhật trạng thái nút Trước / Sau
+      if (pdfBtnPrev) pdfBtnPrev.disabled = (num <= 1);
+      if (pdfBtnNext) pdfBtnNext.disabled = (num >= pdfTotalPageCount);
+
+      try {
+        const page = await pdfDoc.getPage(num);
+        const viewport = page.getViewport({ scale: pdfScale });
+        const context = pdfCanvas.getContext('2d');
+
+        const outputScale = window.devicePixelRatio || 1;
+        pdfCanvas.width = Math.floor(viewport.width * outputScale);
+        pdfCanvas.height = Math.floor(viewport.height * outputScale);
+        pdfCanvas.style.width = Math.floor(viewport.width) + 'px';
+        pdfCanvas.style.height = Math.floor(viewport.height) + 'px';
+
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+        const renderContext = {
+          canvasContext: context,
+          transform: transform,
+          viewport: viewport
+        };
+
+        const renderTask = page.render(renderContext);
+        await renderTask.promise;
+      } catch (err) {
+        console.error(`Lỗi render trang ${num}:`, err);
+      } finally {
+        isRendering = false;
+        if (pageRenderingQueue !== null) {
+          const next = pageRenderingQueue;
+          pageRenderingQueue = null;
+          renderPdfPage(next);
+        }
+      }
+    }
+
+    function goToPdfPage(num) {
+      num = parseInt(num, 10);
+      if (isNaN(num)) num = 1;
+      num = Math.max(1, Math.min(num, pdfTotalPageCount));
+
+      if (isNativeMode) {
+        if (pdfIframeFallback) {
+          pdfIframeFallback.src = `${PDF_BASE_URL}#page=${num}&view=FitH`;
+        }
+        if (pdfPageInput) pdfPageInput.value = num;
+      } else {
+        renderPdfPage(num);
+      }
+    }
+
+    function showPdfLoading(show, text) {
+      if (!pdfLoadingOverlay) return;
+      if (show) {
+        if (text && pdfLoadingText) pdfLoadingText.textContent = text;
+        pdfLoadingOverlay.classList.remove('hidden');
+      } else {
+        pdfLoadingOverlay.classList.add('hidden');
+      }
+    }
+
+    function updateZoomBadge() {
+      if (pdfZoomLevel) {
+        pdfZoomLevel.textContent = `${Math.round(pdfScale * 100)}%`;
+      }
+    }
+
+    function switchToNativeMode() {
+      isNativeMode = true;
+      if (pdfViewerCard) pdfViewerCard.classList.add('show-native');
+      if (pdfIframeFallback && !pdfIframeFallback.src) {
+        pdfIframeFallback.src = `${PDF_BASE_URL}#page=${pdfCurrentPage}&view=FitH`;
+      }
+      if (pdfBtnToggleMode) pdfBtnToggleMode.textContent = '⚡ Xem Canvas Web';
+      showPdfLoading(false);
+    }
+
+    function switchToCanvasMode() {
+      isNativeMode = false;
+      if (pdfViewerCard) pdfViewerCard.classList.remove('show-native');
+      if (pdfBtnToggleMode) pdfBtnToggleMode.textContent = '🖥️ Trình xem gốc';
+      if (!pdfDoc) {
+        initPdfViewer();
+      } else {
+        renderPdfPage(pdfCurrentPage);
+      }
+    }
+
+    // Sự kiện điều hướng PDF Toolbar
+    pdfBtnPrev?.addEventListener('click', () => goToPdfPage(pdfCurrentPage - 1));
+    pdfBtnNext?.addEventListener('click', () => goToPdfPage(pdfCurrentPage + 1));
+
+    pdfPageInput?.addEventListener('change', () => goToPdfPage(pdfPageInput.value));
+    pdfPageInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        goToPdfPage(pdfPageInput.value);
+      }
+    });
+
+    pdfBtnZoomIn?.addEventListener('click', () => {
+      if (isNativeMode) return;
+      pdfScale = Math.min(3.0, pdfScale + 0.2);
+      updateZoomBadge();
+      renderPdfPage(pdfCurrentPage);
+    });
+
+    pdfBtnZoomOut?.addEventListener('click', () => {
+      if (isNativeMode) return;
+      pdfScale = Math.max(0.4, pdfScale - 0.2);
+      updateZoomBadge();
+      renderPdfPage(pdfCurrentPage);
+    });
+
+    pdfBtnZoomFit?.addEventListener('click', async () => {
+      if (isNativeMode) return;
+      await calculateFitScale();
+      renderPdfPage(pdfCurrentPage);
+    });
+
+    pdfBtnToggleMode?.addEventListener('click', () => {
+      if (isNativeMode) {
+        switchToCanvasMode();
+      } else {
+        switchToNativeMode();
+      }
+    });
+
+    pdfBtnFullscreen?.addEventListener('click', () => {
+      if (!pdfViewerCard) return;
+      const isFull = pdfViewerCard.classList.toggle('is-fullscreen');
+      document.body.style.overflow = isFull ? 'hidden' : '';
+      pdfBtnFullscreen.textContent = isFull ? '✕ Thu nhỏ' : '⛶ Toàn màn hình';
+      if (!isNativeMode) {
+        setTimeout(async () => {
+          await calculateFitScale();
+          renderPdfPage(pdfCurrentPage);
+        }, 150);
+      }
+    });
+
+    // Phím tắt ESC để thoát Fullscreen
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && pdfViewerCard?.classList.contains('is-fullscreen')) {
+        pdfViewerCard.classList.remove('is-fullscreen');
+        document.body.style.overflow = '';
+        if (pdfBtnFullscreen) pdfBtnFullscreen.textContent = '⛶ Toàn màn hình';
+        if (!isNativeMode) {
+          setTimeout(async () => {
+            await calculateFitScale();
+            renderPdfPage(pdfCurrentPage);
+          }, 150);
+        }
+      }
+      // Phím mũi tên chuyển trang khi đang ở trong khung tài liệu
+      if (document.activeElement === pdfStage || pdfStage?.contains(document.activeElement)) {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          goToPdfPage(pdfCurrentPage - 1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          goToPdfPage(pdfCurrentPage + 1);
+        }
+      }
+    });
+
+    // Touch Swipe cử chỉ vuốt trên màn hình điện thoại
+    let touchStartX = 0;
+    let touchStartY = 0;
+    pdfStage?.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    pdfStage?.addEventListener('touchend', (e) => {
+      if (e.changedTouches.length === 1) {
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+        // Chỉ nhận diện swipe ngang nếu khoảng cách đủ lớn và không phải đang cuộn dọc
+        if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+          if (deltaX < 0) {
+            goToPdfPage(pdfCurrentPage + 1); // Vuốt sang trái -> trang sau
+          } else {
+            goToPdfPage(pdfCurrentPage - 1); // Vuốt sang phải -> trang trước
+          }
+        }
+      }
+    }, { passive: true });
+
+    // Cập nhật khi xoay màn hình điện thoại hoặc đổi kích thước cửa sổ
+    window.addEventListener('resize', () => {
+      if (!isNativeMode && pdfDoc) {
+        clearTimeout(window._pdfResizeTimer);
+        window._pdfResizeTimer = setTimeout(async () => {
+          await calculateFitScale();
+          renderPdfPage(pdfCurrentPage);
+        }, 200);
+      }
+    });
+
+    // Khởi chạy PDF Viewer khi trang nạp xong
+    window.addEventListener('DOMContentLoaded', () => {
+      initPdfViewer();
+    });
+
+    // SHORTCUTS PILLS (CHUYỂN NHANH THEO TRANG VÀ CUỘN MƯỢT)
+    document.querySelectorAll('.shortcut-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = parseInt(btn.dataset.page, 10) || 1;
+        goToPdfPage(page);
+        pdfViewerCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast(`Đã mở trang ${page}: ${btn.getAttribute('title') || 'Đồ án'}`);
+      });
+    });
+
+    // -------------------------------------------------------------
+    // FORM SURVEY & MODAL LOGIC
+    // -------------------------------------------------------------
     const modal = document.getElementById('surveyModal');
     const toast = document.getElementById('toast');
     const reviewConfirm = document.getElementById('reviewConfirm');
@@ -2750,85 +3302,8 @@
 
     const mobileToggle = document.getElementById('mobileToggle');
     const mobileDrawer = document.getElementById('mobileDrawer');
-    const pdfIframe = document.getElementById('pdfIframe');
-    const pdfWrap = document.getElementById('pdfWrap');
-    const mobileToggleFrameBtn = document.getElementById('mobileToggleFrameBtn');
     const draftRestoreBanner = document.getElementById('draftRestoreBanner');
     const draftRestoreTimeText = document.getElementById('draftRestoreTimeText');
-
-    let currentStep = 1;
-    let selectedProject = null;
-    let activeBothTab = 'st3';
-    let saveTimeout = null;
-
-    const stepTitles = {
-      1: 'Chọn đồ án muốn góp ý',
-      2: 'Thông tin người đóng góp ý kiến',
-      3: 'Đánh giá nội dung đồ án',
-      4: 'Xác nhận & Ý kiến khác',
-      5: 'Hoàn tất đóng góp ý kiến'
-    };
-
-    const projectNames = {
-      st3: 'Quy hoạch phân khu đô thị ST3',
-      xuankhanh: 'Quy hoạch phân khu khu chức năng vùng hồ Xuân Khanh và phụ cận',
-      both: 'Cả hai đồ án: ST3 và vùng hồ Xuân Khanh và phụ cận'
-    };
-
-    const commonQuestions = [
-      'Các căn cứ lập quy hoạch đã đầy đủ hay chưa?',
-      'Quy mô lập quy hoạch có phù hợp với quy định không?',
-      'Tính chất và chức năng khu vực có phù hợp không?',
-      'Phương án quy hoạch có phù hợp không?',
-      'Quý vị có đồng ý với toàn bộ các nội dung của đồ án quy hoạch để triển khai các bước tiếp theo không?'
-    ];
-
-    // MOBILE DRAWER HANDLER
-    if (mobileToggle && mobileDrawer) {
-      mobileToggle.addEventListener('click', () => {
-        const isOpen = mobileDrawer.classList.toggle('open');
-        mobileToggle.classList.toggle('active', isOpen);
-        mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
-
-      document.querySelectorAll('.js-mobile-nav').forEach(link => {
-        link.addEventListener('click', () => {
-          mobileDrawer.classList.remove('open');
-          mobileToggle.classList.remove('active');
-          mobileToggle.setAttribute('aria-expanded', 'false');
-        });
-      });
-    }
-
-    // TOGGLE MOBILE PDF EMBED
-    if (mobileToggleFrameBtn && pdfWrap) {
-      mobileToggleFrameBtn.addEventListener('click', () => {
-        const isShown = pdfWrap.classList.toggle('show-on-mobile');
-        mobileToggleFrameBtn.textContent = isShown 
-          ? '▼ Ẩn khung xem PDF trực tiếp' 
-          : '▶ Hiển thị khung xem PDF trực tiếp trên trang';
-        if (isShown) {
-          pdfWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      });
-    }
-
-    // SHORTCUTS PILLS (JUMP TO PAGE)
-    document.querySelectorAll('.shortcut-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const page = btn.dataset.page || 1;
-        const targetUrl = `${PDF_BASE_URL}#page=${page}&view=FitH`;
-        if (window.innerWidth < 768) {
-          window.open(targetUrl, '_blank');
-        } else {
-          if (pdfIframe) {
-            pdfIframe.src = targetUrl;
-            pdfWrap?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            showToast(`Đã chuyển tới trang ${page} của đồ án`);
-          }
-        }
-      });
-    });
 
     function showToast(message) {
       if (!toast) return;
