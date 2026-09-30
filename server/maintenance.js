@@ -28,7 +28,7 @@ if (action === 'on' || action === 'dong' || action === 'close') {
     }, null, 2));
 
     console.log('🛑 [ĐÃ TẠM ĐÓNG TRANG THÀNH CÔNG]');
-    console.log('👉 Người dân truy cập website sẽ thấy ngay trang THÔNG BÁO MỞ VÀO NGÀY MAI.');
+    console.log('👉 Người dân truy cập website sẽ thấy ngay trang THÔNG BÁO MỞ VÀO NGÀY 01/10/2026.');
     console.log('👉 Cán bộ vẫn có thể đăng nhập https://domain/admin bình thường.');
   } catch (err) {
     console.error('Lỗi khi bật chế độ tạm đóng:', err);

@@ -60,7 +60,7 @@ app.use((req, res, next) => {
     if (req.path === '/api/survey/submit') {
       return res.status(503).json({
         success: false,
-        message: 'Cổng tiếp nhận ý kiến đang tạm đóng và sẽ chính thức mở vào ngày mai. Trân trọng!'
+        message: 'Cổng tiếp nhận ý kiến đang tạm đóng và sẽ chính thức mở vào ngày 01/10/2026. Trân trọng!'
       });
     }
 
