@@ -7,7 +7,10 @@
     "start": "node server/app.js",
     "dev": "node --watch server/app.js",
     "init-admin": "node server/init-admin.js",
-    "reset-db": "node server/reset-db.js"
+    "reset-db": "node server/reset-db.js",
+    "dong-trang": "node server/maintenance.js on",
+    "mo-trang": "node server/maintenance.js off",
+    "status-trang": "node server/maintenance.js status"
   },
   "keywords": [
     "khaosat",

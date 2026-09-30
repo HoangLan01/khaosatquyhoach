@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#9d1c20" />
+  <title>Thông Báo | Cổng lấy ý kiến quy hoạch UBND Phường Tùng Thiện</title>
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+
+  <style>
+    :root {
+      --red: #9d1c20;
+      --red-dark: #741317;
+      --red-soft: #fff2f2;
+      --gold: #c89b3c;
+      --gold-soft: #fff9ee;
+      --ink: #172033;
+      --muted: #5f6c84;
+      --line: #e2e8f0;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.12);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 0%, rgba(157, 28, 32, 0.08), transparent 40%),
+        radial-gradient(circle at 90% 100%, rgba(200, 155, 60, 0.08), transparent 40%),
+        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      line-height: 1.6;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--red-dark);
+      color: #ffffff;
+      font-size: 13px;
+      padding: 8px 16px;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* HEADER */
+    header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(157, 28, 32, 0.15);
+      background: #ffffff;
+    }
+
+    .brand-text strong {
+      display: block;
+      color: var(--red-dark);
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .brand-text span {
+      display: block;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .admin-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .admin-link:hover {
+      color: var(--red);
+      border-color: #d1a4a6;
+      background: var(--red-soft);
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 30px 16px;
+    }
+
+    .notice-card {
+      width: min(680px, 100%);
+      background: var(--surface);
+      border-radius: 24px;
+      border: 1.5px solid #ebd7d8;
+      box-shadow: var(--shadow-lg);
+      padding: 40px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .notice-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--red-dark), var(--red), var(--gold));
+    }
+
+    .status-icon-wrap {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: var(--red-soft);
+      border: 2px solid #fed7d7;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      animation: gentleBounce 2.5s ease-in-out infinite;
+    }
+
+    @keyframes gentleBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .notice-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--gold-soft);
+      color: #785208;
+      border: 1px solid #f6e0b3;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(22px, 3.2vw, 28px);
+      font-weight: 850;
+      color: var(--red-dark);
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .project-name-highlight {
+      font-size: 15px;
+      font-weight: 750;
+      color: var(--ink);
+      background: #f8fafc;
+      border: 1px dashed var(--line);
+      padding: 10px 16px;
+      border-radius: 12px;
+      margin: 16px 0 20px;
+      line-height: 1.45;
+    }
+
+    .notice-desc {
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* ACTION BOX */
+    .action-box {
+      background: #fcf8f8;
+      border: 1px solid #f3dada;
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .action-box-title {
+      font-size: 13.5px;
+      font-weight: 750;
+      color: var(--red-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 750;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      min-height: 44px;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: #ffffff;
+      border: 1px solid var(--red);
+    }
+
+    .btn-primary:hover {
+      background: var(--red-dark);
+      box-shadow: 0 6px 16px rgba(157, 28, 32, 0.25);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* CONTACT INFO */
+    .contact-info {
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      line-height: 1.5;
+    }
+
+    .contact-info strong {
+      color: var(--ink);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 18px 16px;
+      font-size: 12.5px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    @media (max-width: 540px) {
+      .notice-card {
+        padding: 30px 20px;
+      }
+      .action-btns {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM — ĐỘC LẬP - TỰ DO - HẠNH PHÚC
+  </div>
+
+  <header>
+    <a href="#" class="brand">
+      <img src="assets/logo.png" alt="Logo" class="brand-logo" />
+      <div class="brand-text">
+        <strong>UBND Phường Tùng Thiện</strong>
+        <span>Cổng lấy ý kiến quy hoạch</span>
+      </div>
+    </a>
+
+    <a href="/admin" class="admin-link">
+      🔐 Cán bộ Quản trị
+    </a>
+  </header>
+
+  <main>
+    <div class="notice-card">
+      <div class="status-icon-wrap">
+        ⏳
+      </div>
+
+      <div class="notice-badge">
+        <span>📢</span> <span>Thông báo chính thức</span>
+      </div>
+
+      <h1>Cổng Lấy Ý Kiến Sẽ Chính Thức Mở Tiếp Nhận Vào Ngày Mai</h1>
+
+      <div class="project-name-highlight">
+        🏛 <strong>Đồ án:</strong> Quy hoạch phân khu đô thị ST3 và vùng hồ Xuân Khanh và phụ cận (tỷ lệ 1/2000)
+      </div>
+
+      <p class="notice-desc">
+        Hệ thống cổng thông tin lấy ý kiến cộng đồng dân cư hiện đang trong thời gian rà soát, hoàn thiện khâu kỹ thuật cuối cùng để đảm bảo đường truyền ổn định và thuận tiện nhất cho nhân dân.
+        <br><br>
+        <strong>Kính mời Quý cơ quan, tổ chức và toàn thể nhân dân quay trở lại vào ngày mai</strong> để thực hiện quyền và nghĩa vụ đóng góp ý kiến xây dựng địa phương.
+      </p>
+
+      <div class="action-box">
+        <div class="action-box-title">
+          <span>📖</span> <span>Trong thời gian chờ, Quý vị có thể xem trước hồ sơ quy hoạch:</span>
+        </div>
+        <div class="action-btns">
+          <a href="documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf" target="_blank" rel="noopener" class="btn btn-primary">
+            ↗ Đọc Báo cáo Quy hoạch (PDF)
+          </a>
+          <a href="documents/26.9.25-%20Bao%20cao%20QHPK%20ST3%20XK.pdf" download="Bao_cao_Quy_hoach_ST3_Xuan_Khanh.pdf" class="btn btn-secondary">
+            ↓ Tải tài liệu về máy (~39MB)
+          </a>
+        </div>
+      </div>
+
+      <div class="contact-info">
+        <strong>ỦY BAN NHÂN DÂN PHƯỜNG TÙNG THIỆN · THỊ XÃ SƠN TÂY</strong><br>
+        Mọi thắc mắc cần hỗ trợ, xin vui lòng liên hệ trực tiếp Bộ phận Địa chính - Xây dựng / Ban Quản lý dự án.
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    © 2026 · Cổng lấy ý kiến đóng góp đồ án quy hoạch UBND Phường Tùng Thiện.
+  </footer>
+
+</body>
+</html>

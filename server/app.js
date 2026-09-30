@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+const fs = require('fs');
 const XLSX = require('xlsx');
 
 const {
@@ -24,6 +25,13 @@ initDefaultAdmin();
 
 const app = express();
 const PORT = process.env.PORT || 3026;
+const rootDir = path.join(__dirname, '..');
+const maintenanceFlagPath = path.join(rootDir, 'maintenance.flag');
+
+// Hàm kiểm tra trạng thái tạm đóng trang
+function isMaintenanceMode() {
+  return fs.existsSync(maintenanceFlagPath) || process.env.MAINTENANCE_MODE === 'true';
+}
 
 // Bảo mật & Middleware
 app.use(helmet({
@@ -33,6 +41,34 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware chặn truy cập người dân khi đang bật chế độ bảo trì / tạm đóng trang
+app.use((req, res, next) => {
+  if (isMaintenanceMode()) {
+    // Luôn cho phép truy cập tài nguyên tĩnh và trang cán bộ quản trị
+    if (
+      req.path === '/admin' || 
+      req.path.startsWith('/api/admin') || 
+      req.path.startsWith('/assets') || 
+      req.path.startsWith('/documents') ||
+      req.path === '/favicon.ico'
+    ) {
+      return next();
+    }
+
+    // Chặn API gửi phiếu khảo sát
+    if (req.path === '/api/survey/submit') {
+      return res.status(503).json({
+        success: false,
+        message: 'Cổng tiếp nhận ý kiến đang tạm đóng và sẽ chính thức mở vào ngày mai. Trân trọng!'
+      });
+    }
+
+    // Chuyển hướng người dân sang trang thông báo
+    return res.sendFile(path.join(rootDir, 'maintenance.html'));
+  }
+  next();
+});
 
 // Hàm tạo mã biên nhận ngẫu nhiên siêu an toàn (1.000 tỷ khả năng)
 function generateReceiptCode() {
@@ -249,11 +285,6 @@ app.get('/api/admin/export', requireAdminAuth, (req, res) => {
     return res.status(500).json({ success: false, message: 'Lỗi trong quá trình xuất tệp Excel.' });
   }
 });
-
-// -------------------------------------------------------------
-// 3. PHỤC VỤ GIAO DIỆN TĨNH & ROUTING
-// -------------------------------------------------------------
-const rootDir = path.join(__dirname, '..');
 
 // Phục vụ tệp tĩnh (assets, documents, index.html, admin.html)
 app.use(express.static(rootDir));
